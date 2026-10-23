@@ -65,6 +65,7 @@ Perfect for:
 * Netlify – JAMstack projects
 * Render – Full-stack hosting
 * Firebase – Backend + hosting
+* [Shipvela](https://shipvela.com/) – React/Vite and static hosting; free Hobby: 3 projects, 20 publishes/month
 
 ---
 
