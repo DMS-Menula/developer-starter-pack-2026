@@ -66,6 +66,7 @@ Perfect for:
 * Render – Full-stack hosting
 * Firebase – Backend + hosting
 * [Shipvela](https://shipvela.com/) – React/Vite and static hosting; free Hobby: 3 projects, 20 publishes/month
+* [deed.page](https://deed.page/) – Static hosting from one API request or an AI agent's MCP call; free plan: 25 sites, 25 MB each, no signup
 
 ---
 
