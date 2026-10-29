@@ -122,6 +122,7 @@ Tip: Follow step-by-step, don’t rush 🚶‍♂️
 * Free Programming Books
 * Public APIs
 * System Design Primer
+* [Free For Dev](https://github.com/ripienaar/free-for-dev)
 
 ---
 
