@@ -17,14 +17,11 @@ concurrency:
 
 jobs:
   repository-assistant:
-    if: >
-      github.event_name == 'issues' ||
-      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - name: Acknowledge issues and summarize pull requests
+      - name: Handle issue and PR events
         uses: actions/github-script@v7
         with:
           script: |
@@ -78,7 +75,7 @@ jobs:
                   comment_id: existing.id,
                   body: `${botMarker}\n${body}`
                 });
-                core.info(`Updated existing bot comment on #${issueNumber}`);
+                core.info(`Updated repo assistant comment on #${issueNumber}`);
               } else {
                 await github.rest.issues.createComment({
                   owner,
@@ -86,7 +83,7 @@ jobs:
                   issue_number: issueNumber,
                   body: `${botMarker}\n${body}`
                 });
-                core.info(`Created bot comment on #${issueNumber}`);
+                core.info(`Created repo assistant comment on #${issueNumber}`);
               }
             }
 
