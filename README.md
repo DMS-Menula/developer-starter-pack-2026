@@ -123,6 +123,7 @@ Tip: Follow step-by-step, don’t rush 🚶‍♂️
 * Public APIs
 * System Design Primer
 * [Free For Dev](https://github.com/ripienaar/free-for-dev)
+* [CS Video Cources](https://github.com/Developer-Y/cs-video-courses)
 
 ---
 
