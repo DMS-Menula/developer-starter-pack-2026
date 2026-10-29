@@ -112,6 +112,7 @@ Tip: Follow step-by-step, don’t rush 🚶‍♂️
 * Weather App
 * Simple Ecommerce UI
 * Chat Application
+* Simple AI Chat Application Using Gemini API
 
 ---
 
