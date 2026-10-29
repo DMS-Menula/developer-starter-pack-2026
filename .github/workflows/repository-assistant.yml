@@ -1,0 +1,221 @@
+name: DMS-Menula Repository Assistant
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: repository-assistant-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  repository-assistant:
+    if: >
+      github.event_name == 'issues' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Acknowledge issues and summarize pull requests
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const eventName = context.eventName;
+            const action = context.payload.action || 'opened';
+            const botMarker = '<!-- repository-assistant -->';
+
+            function clean(value, max = 500) {
+              return String(value ?? '')
+                .replace(/\r?\n+/g, ' ')
+                .replace(/\s{2,}/g, ' ')
+                .replace(/[<>`]/g, '')
+                .trim()
+                .slice(0, max);
+            }
+
+            function formatFiles(files, maxFiles = 10) {
+              const list = files.slice(0, maxFiles).map(file => {
+                const filename = clean(file.filename, 180);
+                const status = clean(file.status, 20);
+                return `- \`${filename}\` — ${status} • +${file.additions}/-${file.deletions}`;
+              });
+
+              if (files.length > maxFiles) {
+                list.push(`- ...and ${files.length - maxFiles} more file(s).`);
+              }
+
+              return list.length ? list : ['- No changed files detected.'];
+            }
+
+            async function findBotComment(issueNumber) {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number: issueNumber, per_page: 100 }
+              );
+
+              return comments.find(comment => {
+                const body = comment.body || '';
+                return comment.user?.login === 'github-actions[bot]' && body.includes(botMarker);
+              }) || null;
+            }
+
+            async function upsertBotComment(issueNumber, body) {
+              const existing = await findBotComment(issueNumber);
+
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: `${botMarker}\n${body}`
+                });
+                core.info(`Updated existing bot comment on #${issueNumber}`);
+              } else {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                  body: `${botMarker}\n${body}`
+                });
+                core.info(`Created bot comment on #${issueNumber}`);
+              }
+            }
+
+            async function handleIssue() {
+              const issue = context.payload.issue;
+              const labelName = 'needs-review';
+
+              const labels = await github.paginate(
+                github.rest.issues.listLabelsForRepo,
+                { owner, repo, per_page: 100 }
+              );
+
+              if (!labels.some(label => label.name === labelName)) {
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name: labelName,
+                  color: '7C3AED',
+                  description: 'Waiting for maintainer review'
+                });
+              }
+
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issue.number,
+                labels: [labelName]
+              });
+
+              const issueTitle = clean(issue.title, 180);
+              const issueBody = clean(issue.body, 900) || 'No issue description was provided.';
+
+              const comment = [
+                '## 🚀 DMS-MENULA // ISSUE RECEIVED',
+                '',
+                `Hey @${clean(issue.user.login, 100)}! 👋`,
+                '',
+                `Thanks for opening **Issue #${issue.number}**: **${issueTitle}**`,
+                '',
+                '✅ This issue has been received and sent to @DMS-Menula for review.',
+                '',
+                '### 🔎 Issue summary',
+                issueBody,
+                '',
+                '### 🏷️ Tracking',
+                '- Label applied: `needs-review`',
+                '- Status: Awaiting maintainer review',
+                '',
+                'Please include reproduction steps, screenshots, logs, or expected vs. actual behavior if helpful.',
+                '',
+                '---',
+                '_Automated message from DMS-Menula Repository Assistant 🤖_'
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: comment
+              });
+
+              core.info(`Acknowledged issue #${issue.number}`);
+            }
+
+            async function handlePullRequest() {
+              const pr = context.payload.pull_request;
+              if (!pr) throw new Error('Pull request data is missing.');
+
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner, repo, pull_number: pr.number, per_page: 100 }
+              );
+
+              const summary = [
+                '## ⚡ DMS-MENULA // PULL REQUEST SUMMARY',
+                '',
+                `Hey @${clean(pr.user.login, 100)}! Thanks for the contribution! 🚀`,
+                '',
+                '### 📌 Overview',
+                `**PR:** #${pr.number} — ${clean(pr.title, 200)}`,
+                `**Author:** @${clean(pr.user.login, 100)}`,
+                `**Target branch:** \`${clean(pr.base.ref, 100)}\``,
+                `**Files changed:** ${files.length}`,
+                `**Additions:** +${pr.additions} • **Deletions:** -${pr.deletions}`,
+                '',
+                '### 🧠 Purpose',
+                clean(pr.body, 900) || 'No description provided.',
+                '',
+                '### 📂 Changed Files',
+                ...formatFiles(files, 10),
+                '',
+                '### ✅ Review Checklist',
+                '- [ ] Review code quality and implementation details',
+                '- [ ] Validate tests and edge cases',
+                '- [ ] Check docs and compatibility impacts',
+                '- [ ] Confirm no security or regression issues',
+                '',
+                '### 🛡️ Status',
+                '- State: Awaiting maintainer review',
+                '- Automatic merge: Disabled',
+                '- Bot action: Summary only',
+                '',
+                `@DMS-Menula — please review PR #${pr.number} when available.`,
+                '',
+                '---',
+                '_Generated automatically by DMS-Menula Repository Assistant 🤖_'
+              ].join('\n');
+
+              await upsertBotComment(pr.number, summary);
+              core.info(`Summarized PR #${pr.number}`);
+            }
+
+            try {
+              if (eventName === 'issues' && ['opened', 'reopened'].includes(action)) {
+                await handleIssue();
+                return;
+              }
+
+              if (
+                eventName === 'pull_request_target' &&
+                ['opened', 'reopened', 'synchronize', 'ready_for_review'].includes(action)
+              ) {
+                await handlePullRequest();
+                return;
+              }
+            } catch (error) {
+              core.error(`Event: ${eventName}`);
+              core.error(`Repository: ${owner}/${repo}`);
+              core.error(`API error: ${error.message}`);
+              core.error(`HTTP status: ${error.status || 'unknown'}`);
+              throw error;
+            }
