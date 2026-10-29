@@ -1,4 +1,3 @@
-
 name: DMS-Menula Repository Assistant
 
 on:
@@ -14,7 +13,9 @@ permissions:
 
 jobs:
   repository-assistant:
-    name: Repository Assistant
+    if: >
+      github.event_name == 'issues' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
     steps:
