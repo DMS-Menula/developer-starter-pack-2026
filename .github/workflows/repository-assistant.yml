@@ -1,0 +1,169 @@
+
+name: DMS-Menula Repository Assistant
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  repository-assistant:
+    name: Repository Assistant
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Respond to issue or summarize pull request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const event = context.eventName;
+
+            function safeText(value, limit = 500) {
+              return String(value || "")
+                .replace(/[\r\n]+/g, " ")
+                .replace(/[<>`]/g, "")
+                .trim()
+                .slice(0, limit);
+            }
+
+            if (event === "issues") {
+              const issue = context.payload.issue;
+              const labelName = "needs-review";
+
+              const labels = await github.paginate(
+                github.rest.issues.listLabelsForRepo,
+                { owner, repo, per_page: 100 }
+              );
+
+              if (!labels.some(label => label.name === labelName)) {
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name: labelName,
+                  color: "7C3AED",
+                  description: "Waiting for maintainer review"
+                });
+              }
+
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issue.number,
+                labels: [labelName]
+              });
+
+              const comment = [
+                "## ⚡ DMS-MENULA // ISSUE RECEIVED",
+                "",
+                `Hey @${safeText(issue.user.login, 100)}! 👋`,
+                "",
+                "Thanks for opening an issue in **" +
+                  safeText(repo, 100) + "**.",
+                "",
+                "🟣 **Status:** Received",
+                "",
+                "📨 **Maintainer notification:**",
+                `This issue has been sent to @DMS-Menula for review.`,
+                "",
+                "🏷️ **Label:** `needs-review`",
+                "",
+                "Please provide additional details, reproduction steps, " +
+                  "or screenshots if they help explain the issue.",
+                "",
+                "---",
+                "*Automated response by DMS-Menula Repository Assistant 🤖*"
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: comment
+              });
+
+              core.info(`Acknowledged issue #${issue.number}`);
+            }
+
+            if (event === "pull_request") {
+              const pr = context.payload.pull_request;
+
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                {
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  per_page: 100
+                }
+              );
+
+              const fileLines = files.slice(0, 20).map(file => {
+                const filename = safeText(file.filename, 180);
+                const status = safeText(file.status, 30);
+                return `- \`${filename}\` — ${status}; +${file.additions}/-${file.deletions}`;
+              });
+
+              if (files.length > 20) {
+                fileLines.push(
+                  `- ...and ${files.length - 20} more file(s).`
+                );
+              }
+
+              const title = safeText(pr.title, 250);
+              const description = safeText(pr.body, 700);
+              const author = safeText(pr.user.login, 100);
+
+              const checklist = [
+                "- [ ] Review the implementation and changed files.",
+                "- [ ] Check relevant tests and edge cases.",
+                "- [ ] Verify documentation is updated where necessary.",
+                "- [ ] Check for security or compatibility concerns."
+              ];
+
+              const comment = [
+                "## ⚡ DMS-MENULA // PULL REQUEST ANALYSIS",
+                "",
+                `Hey @${author}! Thanks for contributing! 🚀`,
+                "",
+                "### 📌 Overview",
+                `**PR:** #${pr.number} — ${title}`,
+                `**Author:** @${author}`,
+                `**Target branch:** \`${safeText(pr.base.ref, 100)}\``,
+                "",
+                "### 🧠 Purpose",
+                description || "No description provided. Please explain the purpose and expected behavior of this change.",
+                "",
+                "### 📂 Changed Files",
+                `**${files.length} file(s) changed** · **+${pr.additions} additions** · **-${pr.deletions} deletions**`,
+                "",
+                ...(fileLines.length ? fileLines : ["- No changed files returned."]),
+                "",
+                "### ✅ Maintainer Review Checklist",
+                ...checklist,
+                "",
+                "### 🛡️ Review Status",
+                "- **State:** Awaiting maintainer review",
+                "- **Automatic merge:** Disabled",
+                "- **Tests executed by this bot:** None",
+                "",
+                `@DMS-Menula — please review PR #${pr.number} when available.`,
+                "",
+                "---",
+                "*Generated automatically by DMS-Menula Repository Assistant 🤖*"
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: comment
+              });
+
+              core.info(`Summarized PR #${pr.number}`);
+            }
