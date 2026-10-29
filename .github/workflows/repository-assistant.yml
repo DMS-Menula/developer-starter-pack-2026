@@ -92,33 +92,18 @@ jobs:
                 core.info(`Acknowledged issue #${issue.number}`);
               }
 
-              if (
-                event === "pull_request_target" ||
-                event === "pull_request"
-              ) {
+              if (event === "pull_request_target" || event === "pull_request") {
                 const pr = context.payload.pull_request;
-
-                if (!pr) {
-                  throw new Error("Pull request data was not found in the event payload.");
-                }
-
-                core.info(`Summarizing PR #${pr.number}`);
-                core.info(`Triggered by event: ${event}`);
+                if (!pr) throw new Error("Pull request data missing");
 
                 const files = await github.paginate(
                   github.rest.pulls.listFiles,
-                  {
-                    owner,
-                    repo,
-                    pull_number: pr.number,
-                    per_page: 100
-                  }
+                  { owner, repo, pull_number: pr.number, per_page: 100 }
                 );
 
                 const fileLines = files.slice(0, 20).map(file => {
                   const filename = safeText(file.filename, 180);
                   const status = safeText(file.status, 30);
-
                   return `- \`${filename}\` — ${status}; +${file.additions}/-${file.deletions}`;
                 });
 
