@@ -140,6 +140,7 @@ Tip: Follow step-by-step, don’t rush 🚶‍♂️
 ## 💼 Resume & Career Resources
 
 * [JobEmerge](https://www.jobemerge.work/) – Job-fit analysis, 19-language resume translation, and Markdown resume editing
+* [ResumeInvited](https://resumeinvited.com/) – Free browser resume builder with local drafts and PDF or Word export, no signup required
 * Resume Builders
 * Interview Preparation
 * Coding Challenges
