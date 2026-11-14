@@ -39,6 +39,7 @@ Perfect for:
 
 ## 🛠️ Must-Have Developer Tools
 
+* [BestJSON](https://bestjson.com/) – Free browser-based tools to format, validate, repair, compare, query, and convert JSON locally without uploading input.
 * VS Code – Code editor
 * Git & GitHub – Version control
 * Postman – API testing
