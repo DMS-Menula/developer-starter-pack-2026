@@ -79,6 +79,7 @@ Perfect for:
 * Perplexity – Research assistant
 * Codeium – Free AI autocomplete
 * Gemini - Powerful AI ( Recommended For Image Generating )
+* GetYouTubeTranscript – YouTube video transcripts for AI summaries and notes
 
 ---
 
