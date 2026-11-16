@@ -40,6 +40,7 @@ Perfect for:
 ## 🛠️ Must-Have Developer Tools
 
 * [BestJSON](https://bestjson.com/) – Free browser-based tools to format, validate, repair, compare, query, and convert JSON locally without uploading input.
+* [AppScreen](https://appscreen.pro/) – Free browser tool for making App Store and Google Play screenshots for your mobile app, no sign-up needed.
 * VS Code – Code editor
 * Git & GitHub – Version control
 * Postman – API testing
