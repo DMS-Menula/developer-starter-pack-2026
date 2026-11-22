@@ -145,6 +145,7 @@ Tip: Follow step-by-step, don’t rush 🚶‍♂️
 * [JobEmerge](https://www.jobemerge.work/) – Job-fit analysis, 19-language resume translation, and Markdown resume editing
 * [ResumeInvited](https://resumeinvited.com/) – Free browser resume builder with local drafts and PDF or Word export, no signup required
 * [CookLLM](https://cookllm.com/en/jobs/match) – New AI jobs and hiring posts, scored against your resume
+* [Aethel](https://aethel.pro/practice) – Free AI interview practice for developers, no account
 * Resume Builders
 * Interview Preparation
 * Coding Challenges
