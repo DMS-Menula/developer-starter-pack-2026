@@ -1,9 +1,9 @@
-![Developer Starter Pack 2026](assets/banner.png)
+![Developer Starter Pack 2027](assets/banner.png)
 
 
-# 🚀 Developer Starter Pack 2026 
+# 🚀 Developer Starter Pack 2027 
 
-Everything a developer needs in 2026.
+Everything a developer needs in 2027.
  
 Free tools • AI resources • Roadmaps • Project ideas • Platforms
 
