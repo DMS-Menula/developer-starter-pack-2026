@@ -1,4 +1,4 @@
-![Developer Starter Pack 2027](assets/banner.png)
+![Developer Starter Pack 2027](assets/dev-2027s.png)
 
 
 # 🚀 Developer Starter Pack 2027 
