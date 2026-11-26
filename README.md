@@ -82,6 +82,7 @@ Perfect for:
 * Gemini - Powerful AI ( Recommended For Image Generating )
 * GetYouTubeTranscript – YouTube video transcripts for AI summaries and notes
 * [Kite](https://kite.new) – Design tool your AI agents share with your team: Claude, ChatGPT, Cursor or Codex draw editable UI layers via a hosted MCP server, then copy any frame as HTML, React or Tailwind. Free plan.
+* [Scalekit](https://www.scalekit.com) – AI agent integrations platform and MCP gateway: lets the agents you build call tools in Gmail, Slack, GitHub and 1,100+ other apps on behalf of each user. Free plan.
 
 ---
 
